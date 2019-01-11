@@ -49,6 +49,19 @@ static FCMPlugin *fcmPluginInstance;
     }];
 }
 
+// REMOVE TOKEN //
+- (void) removeToken:(CDVInvokedUrlCommand *)command 
+{
+    NSLog(@"remove Token");
+    [self.commandDelegate runInBackground:^{
+        [[FIRInstanceID instanceID] deleteTokenWithAuthorizedEntity:^(FIRInstanceIDResult * _Nullable result, NSError * _Nullable error) {
+            CDVPluginResult* pluginResult = nil;
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[]];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        }
+    }];
+}
+
 // UN/SUBSCRIBE TOPIC //
 - (void) subscribeToTopic:(CDVInvokedUrlCommand *)command 
 {
