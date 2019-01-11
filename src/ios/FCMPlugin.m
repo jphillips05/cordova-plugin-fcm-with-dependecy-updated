@@ -60,6 +60,7 @@ static FCMPlugin *fcmPluginInstance;
                 NSLog(@"Error deleting instance ID: %@", error);
                 pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@""];
             } else {
+                NSLog(@"Success removing token");
                 pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@""];
             }
             [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
