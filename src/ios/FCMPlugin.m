@@ -50,15 +50,20 @@ static FCMPlugin *fcmPluginInstance;
 }
 
 // REMOVE TOKEN //
-- (void) removeToken:(CDVInvokedUrlCommand *)command 
+- (void) removeToken:(CDVInvokedUrlCommand *)command
 {
     NSLog(@"remove Token");
     [self.commandDelegate runInBackground:^{
-        [[FIRInstanceID instanceID] deleteTokenWithAuthorizedEntity:^(FIRInstanceIDResult * _Nullable result, NSError * _Nullable error) {
+        [[FIRInstanceID instanceID] deleteIDWithHandler:^(NSError *error) {
             CDVPluginResult* pluginResult = nil;
-            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[]];
+            if (error != nil) {
+                NSLog(@"Error deleting instance ID: %@", error);
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@""];
+            } else {
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@""];
+            }
             [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        }
+        }];
     }];
 }
 
