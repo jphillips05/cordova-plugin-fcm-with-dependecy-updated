@@ -107,7 +107,7 @@ public class FCMPlugin extends CordovaPlugin {
 					@Override
 					public void run() {
 						try {
-							String token = FirebaseInstanceId.getInstance().deleteInstanceId();
+							FirebaseInstanceId.getInstance().deleteInstanceId();
 							callbackContext.success();
 						} catch (Exception e) {
 							callbackContext.error(e.getMessage());
