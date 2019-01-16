@@ -17,7 +17,7 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-fcm-with-dependecy-updated" version="4.3.5">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-fcm-with-dependecy-updated" version="4.3.7">
     <name>Cordova FCM Push Plugin</name>
     <description>Google Firebase Cloud Messaging Cordova Push Plugin fork with dependecy updated</description>
     <license>MIT</license>
@@ -35,18 +35,18 @@
     <platform name="android">
 		<config-file target="AndroidManifest.xml" parent="/manifest/application">
 			<activity android:exported="true" android:name="com.gae.scaffolder.plugin.FCMPluginActivity" android:launchMode="singleTop">
-				<intent-filter>
+				<intent-filter android:label="FCMActivityIntent" android:name="FCMActivityIntent">
 					<action android:name="FCM_PLUGIN_ACTIVITY" />
 					<category android:name="android.intent.category.DEFAULT" />
 				</intent-filter>
 			</activity>
 			<service android:name="com.gae.scaffolder.plugin.MyFirebaseMessagingService">
-				<intent-filter>
+				<intent-filter android:label="FirebaseMessagingServiceIntent" android:name="FirebaseMessagingServiceIntent">
 					<action android:name="com.google.firebase.MESSAGING_EVENT"/>
 				</intent-filter>
 			</service>
 			<service android:name="com.gae.scaffolder.plugin.MyFirebaseInstanceIDService">
-				<intent-filter>
+				<intent-filter android:label="FirebaseInstanceIDServiceIntent" android:name="FirebaseInstanceIDServiceIntent">
 					<action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
 				</intent-filter>
 			</service>
