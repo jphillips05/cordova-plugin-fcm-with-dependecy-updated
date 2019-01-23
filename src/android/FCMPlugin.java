@@ -12,8 +12,11 @@ import org.json.JSONObject;
 
 import android.os.Bundle;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.iid.FirebaseInstanceId; //
+import com.google.firebase.iid.FirebaseInstanceId; 
+import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.Map;
 
@@ -55,11 +58,21 @@ public class FCMPlugin extends CordovaPlugin {
 					@Override
 					public void run() {
 						try {
-							String token = FirebaseInstanceId.getInstance().getToken();
-							callbackContext.success(FirebaseInstanceId.getInstance().getToken());
-							Log.d(TAG, "\tToken: " + token);
+							Task<InstanceIdResult> task = FirebaseInstanceId.getInstance().getInstanceId();
+							Tasks.await(task);
+              if (!task.isSuccessful()) {
+	              Log.d(TAG, "getInstanceId failed: " + task.getException().getMessage());
+								callbackContext.error(task.getException().getMessage());
+							}
+							else {
+	              String token = task.getResult().getToken();
+								Log.d(TAG, "\tToken: " + token);
+								FCMPlugin.sendTokenRefresh(token);
+								callbackContext.success(token);
+							}
 						} catch (Exception e) {
-							Log.d(TAG, "\tError retrieving token");
+							Log.d(TAG, "\tError retrieving token: "+e.getMessage());
+								callbackContext.error(e.getMessage());
 						}
 					}
 				});
@@ -107,7 +120,7 @@ public class FCMPlugin extends CordovaPlugin {
 					@Override
 					public void run() {
 						try {
-							String token = FirebaseInstanceId.getInstance().deleteInstanceId();
+							FirebaseInstanceId.getInstance().deleteInstanceId();
 							callbackContext.success();
 						} catch (Exception e) {
 							callbackContext.error(e.getMessage());

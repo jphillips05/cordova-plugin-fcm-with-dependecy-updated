@@ -21,6 +21,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "FCMPlugin";
 
+    @Override
+    public void onNewToken(String token){
+        // Get updated InstanceID token.
+        Log.d(TAG, "Refreshed token: " + token);
+		FCMPlugin.sendTokenRefresh( token );
+
+        // TODO: Implement this method to send any registration to your app's servers.
+        //sendRegistrationToServer(refreshedToken);
+    }
+
     /**
      * Called when message is received.
      *

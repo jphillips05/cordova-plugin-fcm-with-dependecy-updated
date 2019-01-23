@@ -42,10 +42,19 @@ static FCMPlugin *fcmPluginInstance;
 {
     NSLog(@"get Token");
     [self.commandDelegate runInBackground:^{
-        NSString* token = [[FIRInstanceID instanceID] token];
+        [[FIRInstanceID instanceID] instanceIDWithHandler:^(FIRInstanceIDResult * _Nullable result,
+                                                            NSError * _Nullable error) {
         CDVPluginResult* pluginResult = nil;
-        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:token];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        if (error != nil) {
+            NSLog(@"Error fetching remote instance ID: %@", error);
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.description];
+        } else {
+            NSLog(@"Remote instance ID token: %@", result.token);
+            [FCMPlugin.fcmPlugin notifyOfTokenRefresh:result.token];
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:result.token];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        }
+        }];
     }];
 }
 
@@ -58,7 +67,7 @@ static FCMPlugin *fcmPluginInstance;
             CDVPluginResult* pluginResult = nil;
             if (error != nil) {
                 NSLog(@"Error deleting instance ID: %@", error);
-                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@""];
+                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.description];
             } else {
                 NSLog(@"Success removing token");
                 pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@""];

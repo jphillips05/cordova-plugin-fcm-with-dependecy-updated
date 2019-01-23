@@ -86,10 +86,9 @@ NSString *const kGCMMessageIDKey = @"gcm.message_id";
             // For iOS 10 display notification (sent via APNS)
             [UNUserNotificationCenter currentNotificationCenter].delegate = self;
             // For iOS 10 data message (sent via FCM)
-            [FIRMessaging messaging].remoteMessageDelegate = self;
 #endif
         }
-        
+        [FIRMessaging messaging].delegate = self;
         [[UIApplication sharedApplication] registerForRemoteNotifications];
         // [END register_for_notifications]
     }
@@ -97,9 +96,7 @@ NSString *const kGCMMessageIDKey = @"gcm.message_id";
     // [START configure_firebase]
     [FIRApp configure];
     // [END configure_firebase]
-    // Add observer for InstanceID token refresh callback.
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tokenRefreshNotification:)
-                                                 name:kFIRInstanceIDTokenRefreshNotification object:nil];
+
     return YES;
 }
 
@@ -242,14 +239,13 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 
 
 // [START refresh_token]
-- (void)tokenRefreshNotification:(NSNotification *)notification
+- (void)messaging:(FIRMessaging *)messaging didReceiveRegistrationToken:(NSString *)fcmToken
 {
     // Note that this callback will be fired everytime a new token is generated, including the first
     // time. So if you need to retrieve the token as soon as it is available this is where that
     // should be done.
-    NSString *refreshedToken = [[FIRInstanceID instanceID] token];
-    NSLog(@"InstanceID token: %@", refreshedToken);
-    [FCMPlugin.fcmPlugin notifyOfTokenRefresh:refreshedToken];
+    NSLog(@"InstanceID token: %@", fcmToken);
+    [FCMPlugin.fcmPlugin notifyOfTokenRefresh:fcmToken];
     // Connect to FCM since connection may have failed when attempted before having a token.
     [self connectToFcm];
 

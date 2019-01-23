@@ -1,17 +1,33 @@
+/*
+ * Copyright 2017 Google
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #import <Foundation/Foundation.h>
-#import <UIKit/UIKit.h>
 
 @class FIROptions;
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void (^FIRAppVoidBoolCallback)(BOOL success);
+/** A block that takes a BOOL and has no return value. */
+typedef void (^FIRAppVoidBoolCallback)(BOOL success) NS_SWIFT_NAME(FirebaseAppVoidBoolCallback);
 
 /**
  * The entry point of Firebase SDKs.
  *
- * Initialize and configure FIRApp using [FIRApp configure];
- * Or other customized ways as shown below.
+ * Initialize and configure FIRApp using +[FIRApp configure]
+ * or other customized ways as shown below.
  *
  * The logging system has two modes: default mode and debug mode. In default mode, only logs with
  * log level Notice, Warning and Error will be sent to device. In debug mode, all logs will be sent
@@ -21,13 +37,18 @@ typedef void (^FIRAppVoidBoolCallback)(BOOL success);
  * argument in the application's Xcode scheme. When debug mode is enabled via -FIRDebugEnabled,
  * further executions of the application will also be in debug mode. In order to return to default
  * mode, you must explicitly disable the debug mode with the application argument -FIRDebugDisabled.
+ *
+ * It is also possible to change the default logging level in code by calling setLoggerLevel: on
+ * the FIRConfiguration interface.
  */
+NS_SWIFT_NAME(FirebaseApp)
 @interface FIRApp : NSObject
 
 /**
  * Configures a default Firebase app. Raises an exception if any configuration step fails. The
  * default app is named "__FIRAPP_DEFAULT". This method should be called after the app is launched
- * and before using Firebase services. This method is thread safe.
+ * and before using Firebase services. This method is thread safe and contains synchronous file I/O
+ * (reading GoogleService-Info.plist from disk).
  */
 + (void)configure;
 
@@ -38,7 +59,7 @@ typedef void (^FIRAppVoidBoolCallback)(BOOL success);
  *
  * @param options The Firebase application options used to configure the service.
  */
-+ (void)configureWithOptions:(FIROptions *)options;
++ (void)configureWithOptions:(FIROptions *)options NS_SWIFT_NAME(configure(options:));
 
 /**
  * Configures a Firebase app with the given name and options. Raises an exception if any
@@ -48,36 +69,39 @@ typedef void (^FIRAppVoidBoolCallback)(BOOL success);
                Letters, Numbers and Underscore.
  * @param options The Firebase application options used to configure the services.
  */
-+ (void)configureWithName:(NSString *)name options:(FIROptions *)options;
+// clang-format off
++ (void)configureWithName:(NSString *)name
+                  options:(FIROptions *)options NS_SWIFT_NAME(configure(name:options:));
+// clang-format on
 
 /**
  * Returns the default app, or nil if the default app does not exist.
  */
-+ (nullable FIRApp *)defaultApp NS_SWIFT_NAME(defaultApp());
++ (nullable FIRApp *)defaultApp NS_SWIFT_NAME(app());
 
 /**
  * Returns a previously created FIRApp instance with the given name, or nil if no such app exists.
  * This method is thread safe.
  */
-+ (nullable FIRApp *)appNamed:(NSString *)name;
++ (nullable FIRApp *)appNamed:(NSString *)name NS_SWIFT_NAME(app(name:));
 
 /**
- * Returns the set of all extant FIRApp instances, or nil if there is no FIRApp instance. This
+ * Returns the set of all extant FIRApp instances, or nil if there are no FIRApp instances. This
  * method is thread safe.
  */
-+ (nullable NSDictionary *)allApps;
+@property(class, readonly, nullable) NSDictionary<NSString *, FIRApp *> *allApps;
 
 /**
  * Cleans up the current FIRApp, freeing associated data and returning its name to the pool for
- * future use. This method is thread safe in class level.
+ * future use. This method is thread safe.
  */
 - (void)deleteApp:(FIRAppVoidBoolCallback)completion;
 
 /**
- * FIRFirebaseApp instances should not be initialized directly. Call |FIRApp configure|, or
- * |FIRApp configureWithOptions:|, or |FIRApp configureWithNames:options| directly.
+ * FIRApp instances should not be initialized directly. Call +[FIRApp configure],
+ * +[FIRApp configureWithOptions:], or +[FIRApp configureWithNames:options:] directly.
  */
-- (nullable instancetype)init NS_UNAVAILABLE;
+- (instancetype)init NS_UNAVAILABLE;
 
 /**
  * Gets the name of this app.
@@ -85,9 +109,18 @@ typedef void (^FIRAppVoidBoolCallback)(BOOL success);
 @property(nonatomic, copy, readonly) NSString *name;
 
 /**
- * Gets the options for this app.
+ * Gets a copy of the options for this app. These are non-modifiable.
  */
-@property(nonatomic, readonly) FIROptions *options;
+@property(nonatomic, copy, readonly) FIROptions *options;
+
+/**
+ * Gets or sets whether automatic data collection is enabled for all products. Defaults to `YES`
+ * unless `FirebaseDataCollectionDefaultEnabled` is set to `NO` in your app's Info.plist. This value
+ * is persisted across runs of the app so that it can be set once when users have consented to
+ * collection.
+ */
+@property(nonatomic, readwrite, getter=isDataCollectionDefaultEnabled)
+    BOOL dataCollectionDefaultEnabled;
 
 @end
 
