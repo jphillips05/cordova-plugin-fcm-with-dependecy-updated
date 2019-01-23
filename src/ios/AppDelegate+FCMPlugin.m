@@ -51,6 +51,9 @@ NSString *const kGCMMessageIDKey = @"gcm.message_id";
 
     NSLog(@"DidFinishLaunchingWithOptions");
  
+    // [START configure_firebase]
+    [FIRApp configure];
+    // [END configure_firebase]
     
     // Register for remote notifications. This shows a permission dialog on first run, to
     // show the dialog at a more appropriate time move this registration accordingly.
@@ -88,14 +91,11 @@ NSString *const kGCMMessageIDKey = @"gcm.message_id";
             // For iOS 10 data message (sent via FCM)
 #endif
         }
-        [FIRMessaging messaging].delegate = self;
         [[UIApplication sharedApplication] registerForRemoteNotifications];
         // [END register_for_notifications]
     }
 
-    // [START configure_firebase]
-    [FIRApp configure];
-    // [END configure_firebase]
+    [FIRMessaging messaging].delegate = self;
 
     return YES;
 }
@@ -245,52 +245,24 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
     // time. So if you need to retrieve the token as soon as it is available this is where that
     // should be done.
     NSLog(@"InstanceID token: %@", fcmToken);
-    [FCMPlugin.fcmPlugin notifyOfTokenRefresh:fcmToken];
-    // Connect to FCM since connection may have failed when attempted before having a token.
-    [self connectToFcm];
+    [[FIRMessaging messaging] subscribeToTopic:@"ios"];
+    [[FIRMessaging messaging] subscribeToTopic:@"all"];
 
-    // TODO: If necessary send token to appliation server.
+    [FCMPlugin.fcmPlugin notifyOfTokenRefresh:fcmToken];
 }
 // [END refresh_token]
-
-// [START connect_to_fcm]
-- (void)connectToFcm
-{
-    
-    // Won't connect since there is no token
-    if (![[FIRInstanceID instanceID] token]) {
-        return;
-    }
-    
-    // Disconnect previous FCM connection if it exists.
-    [[FIRMessaging messaging] disconnect];
-    
-    [[FIRMessaging messaging] connectWithCompletion:^(NSError * _Nullable error) {
-        if (error != nil) {
-            NSLog(@"Unable to connect to FCM. %@", error);
-        } else {
-            NSLog(@"Connected to FCM.");
-            [[FIRMessaging messaging] subscribeToTopic:@"/topics/ios"];
-            [[FIRMessaging messaging] subscribeToTopic:@"/topics/all"];
-        }
-    }];
-}
-// [END connect_to_fcm]
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
     NSLog(@"app become active");
     [FCMPlugin.fcmPlugin appEnterForeground];
-    [self connectToFcm];
 }
 
 // [START disconnect_from_fcm]
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
     NSLog(@"app entered background");
-    [[FIRMessaging messaging] disconnect];
     [FCMPlugin.fcmPlugin appEnterBackground];
-    NSLog(@"Disconnected from FCM");
 }
 // [END disconnect_from_fcm]
 
