@@ -17,7 +17,7 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-fcm-with-dependecy-updated" version="4.3.10">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-fcm-with-dependecy-updated" version="4.3.11">
     <name>Cordova FCM Push Plugin</name>
     <description>Google Firebase Cloud Messaging Cordova Push Plugin fork with dependecy updated</description>
     <license>MIT</license>
@@ -33,39 +33,36 @@
 
     <!-- ANDROID CONFIGURATION -->
     <platform name="android">
-		<config-file target="AndroidManifest.xml" parent="/manifest/application">
-			<service android:name="com.gae.scaffolder.plugin.MyFirebaseMessagingService">
-				<intent-filter android:label="FirebaseMessagingServiceIntent" android:name="FirebaseMessagingServiceIntent">
-					<action android:name="com.google.firebase.MESSAGING_EVENT"/>
-				</intent-filter>
-			</service>
-		</config-file>
+			<config-file target="AndroidManifest.xml" parent="/manifest/application">
+				<activity android:exported="true" android:name="com.gae.scaffolder.plugin.FCMPluginActivity" android:launchMode="singleTop">
+					<intent-filter android:label="FCMActivityIntent" android:name="FCMActivityIntent">
+						<action android:name="FCM_PLUGIN_ACTIVITY" />
+						<category android:name="android.intent.category.DEFAULT" />
+					</intent-filter>
+				</activity>
+				<service android:name="com.gae.scaffolder.plugin.MyFirebaseMessagingService">
+					<intent-filter android:label="FirebaseMessagingServiceIntent" android:name="FirebaseMessagingServiceIntent">
+						<action android:name="com.google.firebase.MESSAGING_EVENT"/>
+					</intent-filter>
+				</service>
+			</config-file>
+			
+			<config-file target="res/xml/config.xml" parent="/*">
+				<feature name="FCMPlugin" >
+						<param name="android-package" value="com.gae.scaffolder.plugin.FCMPlugin"/>
+						<param name="onload" value="true" />
+					</feature>
+			</config-file>
 
-		<config-file target="AndroidManifest.xml" parent="/manifest/application">
-			<activity android:exported="true" android:name="com.gae.scaffolder.plugin.FCMPluginActivity" android:launchMode="singleTop">
-				<intent-filter android:label="FCMActivityIntent" android:name="FCMActivityIntent">
-					<action android:name="FCM_PLUGIN_ACTIVITY" />
-					<category android:name="android.intent.category.DEFAULT" />
-				</intent-filter>
-			</activity>
-		</config-file>
-		
-		<config-file target="res/xml/config.xml" parent="/*">
-			<feature name="FCMPlugin" >
-					<param name="android-package" value="com.gae.scaffolder.plugin.FCMPlugin"/>
-					<param name="onload" value="true" />
-				</feature>
-		</config-file>
+			<framework src="com.google.firebase:firebase-core:16.+" />
+			<framework src="com.google.firebase:firebase-messaging:17.+" />
 
-        <framework src="com.google.firebase:firebase-core:16.+" />
-        <framework src="com.google.firebase:firebase-messaging:17.+" />
+			<framework src="src/android/FCMPlugin.gradle" custom="true" type="gradleReference"/>
 
-		<framework src="src/android/FCMPlugin.gradle" custom="true" type="gradleReference"/>
-
-		<source-file src="src/android/FCMPlugin.java" target-dir="src/com/gae/scaffolder/plugin" />
-		<source-file src="src/android/MyFirebaseMessagingService.java" target-dir="src/com/gae/scaffolder/plugin" />
-		<source-file src="src/android/FCMPluginActivity.java" target-dir="src/com/gae/scaffolder/plugin" />
-    </platform>
+			<source-file src="src/android/FCMPlugin.java" target-dir="src/com/gae/scaffolder/plugin" />
+			<source-file src="src/android/MyFirebaseMessagingService.java" target-dir="src/com/gae/scaffolder/plugin" />
+			<source-file src="src/android/FCMPluginActivity.java" target-dir="src/com/gae/scaffolder/plugin" />
+		</platform>
 
     <!-- IOS CONFIGURATION -->
     <platform name="ios">
