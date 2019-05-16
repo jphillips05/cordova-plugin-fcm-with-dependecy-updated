@@ -33,7 +33,7 @@
 
     <!-- ANDROID CONFIGURATION -->
     <platform name="android">
-		
+
 			<config-file target="AndroidManifest.xml" parent="/manifest/application">
 				<activity android:exported="true" android:name="com.gae.scaffolder.plugin.FCMPluginActivity" android:launchMode="singleTop">
 					<intent-filter android:label="FCMActivityIntent" android:name="FCMActivityIntent">
@@ -43,6 +43,8 @@
 				</activity>
 			</config-file>
 
+			<config-file parent="/*" target="AndroidManifest.xml" />
+			
 			<config-file target="AndroidManifest.xml" parent="/manifest/application">
 				<service android:name="com.gae.scaffolder.plugin.MyFirebaseMessagingService">
 					<intent-filter android:label="FirebaseMessagingServiceIntent" android:name="FirebaseMessagingServiceIntent">
