@@ -66,6 +66,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         
         Log.d(TAG, "\tNotification Data: " + data.toString());
         FCMPlugin.sendPushPayload( data );
+
+        if(data.get("Type").equals("Video") && data.get("Action").equals("Request")) {
+            Log.d(TAG, "------------ => Starting activity");
+            Intent i = new Intent(this, FCMPluginActivity.class);
+            i.putExtra("FcmNotification", (Serializable) data);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+        } 
+        
         //sendNotification(remoteMessage.getNotification().getTitle(), remoteMessage.getNotification().getBody(), remoteMessage.getData());
     }
     // [END receive_message]

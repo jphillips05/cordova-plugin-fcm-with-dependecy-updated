@@ -28,8 +28,14 @@ public class FCMPluginActivity extends Activity {
         super.onCreate(savedInstanceState);
 		Log.d(TAG, "==> FCMPluginActivity onCreate");
 		
-		Map<String, Object> data = new HashMap<String, Object>();
-        if (getIntent().getExtras() != null) {
+		Intent intent = getIntent();
+
+		if(intent.getSerializableExtra("FcmNotification") != null) {
+		    Log.d(TAG, "===> Incoming call");
+		    HashMap<String, Object> payload = (HashMap<String, Object>) intent.getSerializableExtra("FcmNotification");
+		    FCMPlugin.sendPushPayload(payload);
+        } else if (getIntent().getExtras() != null) {
+            Map<String, Object> data = new HashMap<String, Object>();
 			Log.d(TAG, "==> USER TAPPED NOTFICATION");
 			data.put("wasTapped", true);
 			for (String key : getIntent().getExtras().keySet()) {
@@ -37,9 +43,9 @@ public class FCMPluginActivity extends Activity {
                 Log.d(TAG, "\tKey: " + key + " Value: " + value);
 				data.put(key, value);
             }
+
+            FCMPlugin.sendPushPayload(data);
         }
-		
-		FCMPlugin.sendPushPayload(data);
 
         finish();
 
