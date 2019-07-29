@@ -41,6 +41,44 @@ FCMPlugin.prototype.onTokenRefreshReceived = function(token){
 	console.log("Received token refresh")
 	console.log(token)
 }
+
+//VOIP
+
+// GET TOKEN //
+
+FCMPlugin.prototype.initVoip = function( success, error ){
+	exec(success, error, "FCMPlugin", 'initVoip', []);
+}
+
+FCMPlugin.prototype.getVoipToken = function( success, error ){
+	exec(success, error, "FCMPlugin", 'getVoipToken', []);
+}
+
+// NOTIFICATION CALLBACK //
+FCMPlugin.prototype.onVoipNotification = function( callback, success, error ){
+	FCMPlugin.prototype.onVoipNotificationReceived = callback;
+	//exec(success, error, "FCMPlugin", 'registerNotification',[]);
+}
+
+// TOKEN REFRESH CALLBACK //
+FCMPlugin.prototype.onVoipTokenRefresh = function( callback ){
+	FCMPlugin.prototype.onVoipTokenRefreshReceived = callback;
+}
+
+// DEFAULT NOTIFICATION CALLBACK //
+FCMPlugin.prototype.onVoipNotificationReceived = function(payload){
+	console.log("Received push notification")
+	console.log(payload)
+}
+
+// DEFAULT TOKEN REFRESH CALLBACK //
+FCMPlugin.prototype.onVoipTokenRefreshReceived = function(token){
+	console.log("Received token refresh")
+	console.log(token)
+}
+
+//VOIP
+
 // FIRE READY //
 exec(function(result){ console.log("FCMPlugin Ready OK") }, function(result){ console.log("FCMPlugin Ready ERROR") }, "FCMPlugin",'ready',[]);
 

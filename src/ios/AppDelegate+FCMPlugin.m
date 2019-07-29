@@ -9,6 +9,8 @@
 #import "FCMPlugin.h"
 #import <objc/runtime.h>
 #import <Foundation/Foundation.h>
+// Link to the PushKit framework
+#import <PushKit/PushKit.h>
 
 #import "Firebase.h"
 
@@ -96,7 +98,7 @@ NSString *const kGCMMessageIDKey = @"gcm.message_id";
     }
 
     [FIRMessaging messaging].delegate = self;
-
+    
     return YES;
 }
 
@@ -272,6 +274,5 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
     lastPush = nil;
     return returnValue;
 }
-
 
 @end
