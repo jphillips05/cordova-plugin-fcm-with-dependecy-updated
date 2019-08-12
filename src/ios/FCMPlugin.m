@@ -8,6 +8,8 @@
 #import "Firebase.h"
 #import <PushKit/PushKit.h>
 
+@import UserNotifications;
+
 @interface FCMPlugin () {}
 @end
 
@@ -19,7 +21,6 @@ static BOOL appInForeground = YES;
 
 static NSString *notificationCallback = @"FCMPlugin.onNotificationReceived";
 static NSString *tokenRefreshCallback = @"FCMPlugin.onTokenRefreshReceived";
-static NSString *voipTokenRefreshCallback = @"FCMPlugin.onVoipTokenRefreshReceived";
 static FCMPlugin *fcmPluginInstance;
 static NSString *voipToken = @"";
 
@@ -30,9 +31,6 @@ static NSString *voipToken = @"";
 
 - (void)initVoip:(CDVInvokedUrlCommand*)command
 {
-  self.VoIPPushCallbackId = command.callbackId;
-  NSLog(@"FCM: callbackId: %@", self.VoIPPushCallbackId);
-
   //http://stackoverflow.com/questions/27245808/implement-pushkit-and-test-in-development-behavior/28562124#28562124
   PKPushRegistry *pushRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
   pushRegistry.delegate = self;
@@ -56,40 +54,19 @@ static NSString *voipToken = @"";
 - (void) getToken:(CDVInvokedUrlCommand *)command 
 {
     NSLog(@"get Token");
-    [self.commandDelegate runInBackground:^{
-        [[FIRInstanceID instanceID] instanceIDWithHandler:^(FIRInstanceIDResult * _Nullable result,
-                                                            NSError * _Nullable error) {
-        CDVPluginResult* pluginResult = nil;
-        if (error != nil) {
-            NSLog(@"Error fetching remote instance ID: %@", error);
-                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.description];
-        } else {
-            NSLog(@"Remote instance ID token: %@", result.token);
-            [FCMPlugin.fcmPlugin notifyOfTokenRefresh:result.token];
-            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:result.token];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        }
-        }];
-    }];
+    CDVPluginResult* pluginResult = nil;
+    [FCMPlugin.fcmPlugin notifyOfTokenRefresh:voipToken];
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:voipToken];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 // REMOVE TOKEN //
 - (void) removeToken:(CDVInvokedUrlCommand *)command
 {
     NSLog(@"remove Token");
-    [self.commandDelegate runInBackground:^{
-        [[FIRInstanceID instanceID] deleteIDWithHandler:^(NSError *error) {
-            CDVPluginResult* pluginResult = nil;
-            if (error != nil) {
-                NSLog(@"Error deleting instance ID: %@", error);
-                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.description];
-            } else {
-                NSLog(@"Success removing token");
-                pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@""];
-            }
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        }];
-    }];
+    CDVPluginResult* pluginResult = nil;
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@""];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 // UN/SUBSCRIBE TOPIC //
@@ -145,34 +122,12 @@ static NSString *voipToken = @"";
     }
 }
 
--(void) notifyOfVoipMessage:(NSData *)payload
-{
-    NSString *JSONString = [[NSString alloc] initWithBytes:[payload bytes] length:[payload length] encoding:NSUTF8StringEncoding];
-    NSString * notifyJS = [NSString stringWithFormat:@"%@(%@);", notificationCallback, JSONString];
-    NSLog(@"stringByEvaluatingJavaScriptFromString %@", notifyJS);
-    
-    if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
-        [(UIWebView *)self.webView stringByEvaluatingJavaScriptFromString:notifyJS];
-    } else {
-        [self.webViewEngine evaluateJavaScript:notifyJS completionHandler:nil];
-    }
-}
 
 -(void) notifyOfTokenRefresh:(NSString *)token
 {
-    NSString * notifyJS = [NSString stringWithFormat:@"%@('%@');", tokenRefreshCallback, token];
-    NSLog(@"stringByEvaluatingJavaScriptFromString %@", notifyJS);
+    voipToken = token;
     
-    if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
-        [(UIWebView *)self.webView stringByEvaluatingJavaScriptFromString:notifyJS];
-    } else {
-        [self.webViewEngine evaluateJavaScript:notifyJS completionHandler:nil];
-    }
-}
-
--(void) notifyOfVoipTokenRefresh:(NSString *)token
-{
-    NSString * notifyJS = [NSString stringWithFormat:@"%@('%@');", voipTokenRefreshCallback, token];
+    NSString * notifyJS = [NSString stringWithFormat:@"%@('%@');", tokenRefreshCallback, token];
     NSLog(@"stringByEvaluatingJavaScriptFromString %@", notifyJS);
     
     if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
@@ -215,21 +170,59 @@ static NSString *voipToken = @"";
     [results setObject:sToken forKey:@"deviceToken"];
     [results setObject:@"true" forKey:@"registration"];
     
-    [FCMPlugin.fcmPlugin notifyOfVoipTokenRefresh:sToken];
+    [FCMPlugin.fcmPlugin notifyOfTokenRefresh:sToken];
 }
 
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
-    NSDictionary *payloadDict = payload.dictionaryPayload[@"aps"];
-    NSLog(@"FCM: didReceiveIncomingPushWithPayload: %@", payloadDict);
+//    NSDictionary *payloadDict = payload.dictionaryPayload[@"notification"];
+//    NSLog(@"FCM: didReceiveIncomingPushWithPayload: %@", payloadDict);
 
-    NSString *message = payloadDict[@"alert"];
+    NSString *message = payload.dictionaryPayload[@"notification"];
     NSLog(@"FCM: received VoIP msg: %@", message);
 
     NSMutableDictionary* results = [NSMutableDictionary dictionaryWithCapacity:2];
     [results setObject:message forKey:@"function"];
     [results setObject:@"someOtherDataForField" forKey:@"someOtherField"];
     
+    
+    NSError *error;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload.dictionaryPayload
+                                                       options:0
+                                                         error:&error];
+    
+    // Video / request should always open if closed and send json
+    // Video / missed should send json if app is open and send notificaiton if app is not
+    // all other when app is open send json
+    //   else send to notification center
+    
+    NSDictionary *dict = payload.dictionaryPayload[@"data"];
+    if([dict[@"Type"] isEqualToString:@"Video"] && [dict[@"Action"] isEqualToString:@"Request"]) {
+        [FCMPlugin.fcmPlugin notifyOfMessage:jsonData];
+    } else {
+        if(appInForeground == NO) {
+            //if app is in background send notification to system
+            UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+            UNMutableNotificationContent *content = [UNMutableNotificationContent new];
+            
+            content.title = [message valueForKey:@"title"];
+            content.body = [message valueForKey: @"body"];
+            content.sound = [UNNotificationSound defaultSound];
+            UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1
+                                                                                                                repeats:NO];
+            NSString *identifier = @"VhApp";
+            UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
+                                                                                  content:content trigger:trigger];
+            
+            [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+                if (error != nil) {
+                    NSLog(@"Something went wrong: %@",error);
+                }
+            }];
+        } else {
+            [FCMPlugin.fcmPlugin notifyOfMessage:jsonData];
+        }
+    }
     
 }
 

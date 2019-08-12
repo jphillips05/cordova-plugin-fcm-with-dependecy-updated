@@ -52,6 +52,10 @@ public class FCMPlugin extends CordovaPlugin {
 				//
 				callbackContext.success();
 			}
+			if (action.equals("initVoip")) {
+				//
+				callbackContext.success();
+			}
 			// GET TOKEN //
 			else if (action.equals("getToken")) {
 				cordova.getThreadPool().execute(new Runnable() {
