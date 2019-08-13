@@ -139,18 +139,19 @@ static NSString *voipToken = @"";
 
 -(void) appEnterBackground
 {
-    NSLog(@"Set state background");
+    NSLog(@"FCM: Set state background");
     appInForeground = NO;
 }
 
 -(void) appEnterForeground
 {
-    NSLog(@"Set state foreground");
+    NSLog(@"FCM: Set state foreground");
     NSData* lastPush = [AppDelegate getLastPush];
     if (lastPush != nil) {
         [FCMPlugin.fcmPlugin notifyOfMessage:lastPush];
     }
     appInForeground = YES;
+
 }
 
 - (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type{
@@ -203,7 +204,7 @@ static NSString *voipToken = @"";
     } else {
         NSLog(@"FCM: Not a Video Request");
         if(appInForeground == NO) {
-            NSLog(@"FCM: App not in the foreground");
+            NSLog(@"FCM: App not in the foreground sending notification");
             //if app is in background send notification to system
             UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
             UNMutableNotificationContent *content = [UNMutableNotificationContent new];

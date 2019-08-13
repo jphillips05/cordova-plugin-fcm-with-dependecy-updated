@@ -254,18 +254,18 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 }
 // [END refresh_token]
 
-// - (void)applicationDidBecomeActive:(UIApplication *)application
-// {
-//     NSLog(@"app become active");
-//     [FCMPlugin.fcmPlugin appEnterForeground];
-// }
+- (void)applicationDidBecomeActive:(UIApplication *)application
+{
+    NSLog(@"app become active");
+    [FCMPlugin.fcmPlugin appEnterForeground];
+}
 
-// // [START disconnect_from_fcm]
-// - (void)applicationDidEnterBackground:(UIApplication *)application
-// {
-//     NSLog(@"app entered background");
-//     [FCMPlugin.fcmPlugin appEnterBackground];
-// }
+// [START disconnect_from_fcm]
+- (void)applicationDidEnterBackground:(UIApplication *)application
+{
+    NSLog(@"app entered background");
+    [FCMPlugin.fcmPlugin appEnterBackground];
+}
 // // [END disconnect_from_fcm]
 
 +(NSData*)getLastPush
