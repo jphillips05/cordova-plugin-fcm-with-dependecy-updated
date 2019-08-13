@@ -202,6 +202,11 @@ static NSString *voipToken = @"";
         NSLog(@"FCM: Video Request, Sending json data");
         [FCMPlugin.fcmPlugin notifyOfMessage:jsonData];
     } else {
+
+        if([dict[@"Type"] isEqualToString:@"Video"] && [dict[@"Action"] isEqualToString:@"Cancel"]) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"CancelCall" object:nil];
+        }
+
         NSLog(@"FCM: Not a Video Request");
         if(appInForeground == NO) {
             NSLog(@"FCM: App not in the foreground sending notification");
