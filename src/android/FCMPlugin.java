@@ -51,15 +51,12 @@ public class FCMPlugin extends CordovaPlugin {
 			if (action.equals("ready")) {
 				//
 				callbackContext.success();
-			}
-			if (action.equals("initVoip")) {
+			} else if (action.equals("initVoip")) {
 				//
 				callbackContext.success();
-			}
-			if (action.equals('appEnterForeground')) {
+			} else if (action.equals("appEnterForeground")) {
 				callbackContext.success();
-			}
-			if (action.equals('appEnterBackground')) {
+			} else if (action.equals("appEnterBackground")) {
 				callbackContext.success();
 			}
 			
