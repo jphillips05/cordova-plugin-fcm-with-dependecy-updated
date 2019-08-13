@@ -79,6 +79,14 @@ FCMPlugin.prototype.onVoipTokenRefreshReceived = function(token){
 
 //VOIP
 
+FCMPlugin.prototype.appEnterForeground = function() {
+	exec(success, error, "FCMPlugin", 'appEnterForeground', []);
+}
+
+FCMPlugin.prototype.appEnterBackground = function() {
+	exec(success, error, "FCMPlugin", 'appEnterBackground', []);
+}
+
 // FIRE READY //
 exec(function(result){ console.log("FCMPlugin Ready OK") }, function(result){ console.log("FCMPlugin Ready ERROR") }, "FCMPlugin",'ready',[]);
 

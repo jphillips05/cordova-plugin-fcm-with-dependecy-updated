@@ -56,6 +56,13 @@ public class FCMPlugin extends CordovaPlugin {
 				//
 				callbackContext.success();
 			}
+			if (action.equals('appEnterForeground')) {
+				callbackContext.success();
+			}
+			if (action.equals('appEnterBackground')) {
+				callbackContext.success();
+			}
+			
 			// GET TOKEN //
 			else if (action.equals("getToken")) {
 				cordova.getThreadPool().execute(new Runnable() {

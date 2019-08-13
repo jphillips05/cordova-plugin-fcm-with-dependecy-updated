@@ -198,9 +198,12 @@ static NSString *voipToken = @"";
     
     NSDictionary *dict = payload.dictionaryPayload[@"data"];
     if([dict[@"Type"] isEqualToString:@"Video"] && [dict[@"Action"] isEqualToString:@"Request"]) {
+        NSLog(@"FCM: Video Request, Sending json data");
         [FCMPlugin.fcmPlugin notifyOfMessage:jsonData];
     } else {
+        NSLog(@"FCM: Not a Video Request");
         if(appInForeground == NO) {
+            NSLog(@"FCM: App not in the foreground");
             //if app is in background send notification to system
             UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
             UNMutableNotificationContent *content = [UNMutableNotificationContent new];
@@ -216,10 +219,13 @@ static NSString *voipToken = @"";
             
             [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
                 if (error != nil) {
-                    NSLog(@"Something went wrong: %@",error);
+                    NSLog(@"FCM: Something went wrong: %@",error);
+                } else {
+                    NSLog(@"FCM: scheduled notification");
                 }
             }];
         } else {
+            NSLog(@"FCM: App in foregground, sending json");
             [FCMPlugin.fcmPlugin notifyOfMessage:jsonData];
         }
     }
