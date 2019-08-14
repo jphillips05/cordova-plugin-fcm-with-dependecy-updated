@@ -74,6 +74,18 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             i.putExtra("FcmNotification", (Serializable) data);
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
+        } else if (data.get("Type").equals("Video") && data.get("Action").equals("Cancel")) {
+            //cancel call
+
+            Connection conn = MyConnectionService.getConnection();
+            Log.d(TAG, "Canceling call from notification");
+            if (conn != null && conn.getState() != Connection.STATE_ACTIVE) {
+                conn.onDisconnect();
+            } else {
+                Log.d(TAG, "Connection already closed");
+                FCMPlugin.sendPushPayload( data );
+            }
+
         } else {
             FCMPlugin.sendPushPayload( data );
         }
