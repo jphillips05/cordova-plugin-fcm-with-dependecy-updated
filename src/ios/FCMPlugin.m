@@ -188,7 +188,7 @@ static NSString *voipToken = @"";
     
     
     NSError *error;
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload.dictionaryPayload
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:payload.dictionaryPayload[@"data"]
                                                        options:0
                                                          error:&error];
     
