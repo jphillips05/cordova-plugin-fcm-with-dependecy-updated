@@ -249,8 +249,8 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
     NSLog(@"InstanceID token: %@", fcmToken);
     [[FIRMessaging messaging] subscribeToTopic:@"ios"];
     [[FIRMessaging messaging] subscribeToTopic:@"all"];
-
-    [FCMPlugin.fcmPlugin notifyOfTokenRefresh:fcmToken];
+    // not handling token from fcm
+    //[FCMPlugin.fcmPlugin notifyOfTokenRefresh:fcmToken];
 }
 // [END refresh_token]
 
