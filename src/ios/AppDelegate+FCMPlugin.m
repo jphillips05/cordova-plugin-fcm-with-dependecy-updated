@@ -250,7 +250,7 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
     [[FIRMessaging messaging] subscribeToTopic:@"ios"];
     [[FIRMessaging messaging] subscribeToTopic:@"all"];
     // not handling token from fcm
-    //[FCMPlugin.fcmPlugin notifyOfTokenRefresh:fcmToken];
+    [FCMPlugin.fcmPlugin notifyOfTokenRefresh:fcmToken];
 }
 // [END refresh_token]
 

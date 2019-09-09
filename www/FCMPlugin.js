@@ -46,8 +46,8 @@ FCMPlugin.prototype.onTokenRefreshReceived = function(token){
 
 // GET TOKEN //
 
-FCMPlugin.prototype.initVoip = function( success, error ){
-	exec(success, error, "FCMPlugin", 'initVoip', []);
+FCMPlugin.prototype.initVoip = function(portalVersion, success, error ){
+	exec(success, error, "FCMPlugin", 'initVoip', [portalVersion]);
 }
 
 FCMPlugin.prototype.getVoipToken = function( success, error ){

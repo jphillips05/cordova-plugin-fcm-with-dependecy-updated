@@ -23,6 +23,8 @@ static NSString *notificationCallback = @"FCMPlugin.onNotificationReceived";
 static NSString *tokenRefreshCallback = @"FCMPlugin.onTokenRefreshReceived";
 static FCMPlugin *fcmPluginInstance;
 static NSString *voipToken = @"";
+static NSString *fcmToken = @"";
+NSString *portalVersion = @"";
 
 + (FCMPlugin *) fcmPlugin {
     
@@ -35,6 +37,7 @@ static NSString *voipToken = @"";
   PKPushRegistry *pushRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
   pushRegistry.delegate = self;
   pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
+  portalVersion = [command.arguments objectAtIndex:0];
 }
 
 - (void) ready:(CDVInvokedUrlCommand *)command
@@ -53,20 +56,56 @@ static NSString *voipToken = @"";
 // GET TOKEN //
 - (void) getToken:(CDVInvokedUrlCommand *)command 
 {
-    NSLog(@"get Token");
-    CDVPluginResult* pluginResult = nil;
-    [FCMPlugin.fcmPlugin notifyOfTokenRefresh:voipToken];
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:voipToken];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    if([portalVersion length] > 0) {
+        NSLog(@"get Token");
+        CDVPluginResult* pluginResult = nil;
+        [FCMPlugin.fcmPlugin notifyOfVoipTokenRefresh:voipToken];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:voipToken];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    } else {
+        NSLog(@"get Token");
+         [self.commandDelegate runInBackground:^{
+             [[FIRInstanceID instanceID] instanceIDWithHandler:^(FIRInstanceIDResult * _Nullable result,
+                                                                 NSError * _Nullable error) {
+             CDVPluginResult* pluginResult = nil;
+             if (error != nil) {
+                 NSLog(@"Error fetching remote instance ID: %@", error);
+                     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.description];
+             } else {
+                 NSLog(@"Remote instance ID token: %@", result.token);
+                 [FCMPlugin.fcmPlugin notifyOfTokenRefresh:result.token];
+                 pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:result.token];
+                 [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+             }
+             }];
+         }];
+    }
 }
 
 // REMOVE TOKEN //
 - (void) removeToken:(CDVInvokedUrlCommand *)command
 {
-    NSLog(@"remove Token");
-    CDVPluginResult* pluginResult = nil;
-    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@""];
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    if([portalVersion length] > 0) {
+        NSLog(@"remove Token");
+        CDVPluginResult* pluginResult = nil;
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@""];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    } else {
+        NSLog(@"remove Token");
+        [self.commandDelegate runInBackground:^{
+         [[FIRInstanceID instanceID] deleteIDWithHandler:^(NSError *error) {
+             CDVPluginResult* pluginResult = nil;
+             if (error != nil) {
+                 NSLog(@"Error deleting instance ID: %@", error);
+                 pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:error.description];
+             } else {
+                 NSLog(@"Success removing token");
+                 pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@""];
+             }
+             [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+         }];
+        }];
+    }
 }
 
 // UN/SUBSCRIBE TOPIC //
@@ -122,11 +161,8 @@ static NSString *voipToken = @"";
     }
 }
 
-
--(void) notifyOfTokenRefresh:(NSString *)token
-{
+-(void) notifyOfVoipTokenRefresh:(NSString *)token {
     voipToken = token;
-    
     NSString * notifyJS = [NSString stringWithFormat:@"%@('%@');", tokenRefreshCallback, token];
     NSLog(@"stringByEvaluatingJavaScriptFromString %@", notifyJS);
     
@@ -134,6 +170,21 @@ static NSString *voipToken = @"";
         [(UIWebView *)self.webView stringByEvaluatingJavaScriptFromString:notifyJS];
     } else {
         [self.webViewEngine evaluateJavaScript:notifyJS completionHandler:nil];
+    }
+}
+
+-(void) notifyOfTokenRefresh:(NSString *)token
+{
+    if([portalVersion length] == 0) {
+        fcmToken = token;
+        NSString * notifyJS = [NSString stringWithFormat:@"%@('%@');", tokenRefreshCallback, token];
+        NSLog(@"stringByEvaluatingJavaScriptFromString %@", notifyJS);
+        
+        if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
+            [(UIWebView *)self.webView stringByEvaluatingJavaScriptFromString:notifyJS];
+        } else {
+            [self.webViewEngine evaluateJavaScript:notifyJS completionHandler:nil];
+        }
     }
 }
 
@@ -154,6 +205,9 @@ static NSString *voipToken = @"";
 
 }
 
+
+
+//voip
 - (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type{
     if([credentials.token length] == 0) {
         NSLog(@"FCM: No device token!");
@@ -171,7 +225,7 @@ static NSString *voipToken = @"";
     [results setObject:sToken forKey:@"deviceToken"];
     [results setObject:@"true" forKey:@"registration"];
     
-    [FCMPlugin.fcmPlugin notifyOfTokenRefresh:sToken];
+    [FCMPlugin.fcmPlugin notifyOfVoipTokenRefresh:sToken];
 }
 
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
