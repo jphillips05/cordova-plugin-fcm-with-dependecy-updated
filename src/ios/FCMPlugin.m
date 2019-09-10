@@ -228,6 +228,30 @@ NSString *portalVersion = @"";
     [FCMPlugin.fcmPlugin notifyOfVoipTokenRefresh:sToken];
 }
 
+- (void)SendPhoneNotification:(NSString *)message {
+    NSLog(@"FCM: App not in the foreground sending notification");
+    //if app is in background send notification to system
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    UNMutableNotificationContent *content = [UNMutableNotificationContent new];
+    
+    content.title = [message valueForKey:@"title"];
+    content.body = [message valueForKey: @"body"];
+    content.sound = [UNNotificationSound defaultSound];
+    UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1
+                                                                                                    repeats:NO];
+    NSString *identifier = @"VhApp";
+    UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
+                                                                          content:content trigger:trigger];
+    
+    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            NSLog(@"FCM: Something went wrong: %@",error);
+        } else {
+            NSLog(@"FCM: scheduled notification");
+        }
+    }];
+}
+
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
 //    NSDictionary *payloadDict = payload.dictionaryPayload[@"notification"];
@@ -256,34 +280,18 @@ NSString *portalVersion = @"";
         NSLog(@"FCM: Video Request, Sending json data");
         [FCMPlugin.fcmPlugin notifyOfMessage:jsonData];
     } else {
-
+        // If cancel request send both json and notification
+        // fix for Katie's phone
+        // for some readon the app thinks its in the foregroud after a missed call and other phones seem not to have this issue
         if([dict[@"Type"] isEqualToString:@"Video"] && [dict[@"Action"] isEqualToString:@"Cancel"]) {
             [[NSNotificationCenter defaultCenter] postNotificationName:@"CancelCall" object:nil];
+            [self SendPhoneNotification:message];
+            return;
         }
 
         NSLog(@"FCM: Not a Video Request");
         if(appInForeground == NO) {
-            NSLog(@"FCM: App not in the foreground sending notification");
-            //if app is in background send notification to system
-            UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-            UNMutableNotificationContent *content = [UNMutableNotificationContent new];
-            
-            content.title = [message valueForKey:@"title"];
-            content.body = [message valueForKey: @"body"];
-            content.sound = [UNNotificationSound defaultSound];
-            UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1
-                                                                                                                repeats:NO];
-            NSString *identifier = @"VhApp";
-            UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
-                                                                                  content:content trigger:trigger];
-            
-            [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
-                if (error != nil) {
-                    NSLog(@"FCM: Something went wrong: %@",error);
-                } else {
-                    NSLog(@"FCM: scheduled notification");
-                }
-            }];
+            [self SendPhoneNotification:message];
         } else {
             NSLog(@"FCM: App in foregground, sending json");
             [FCMPlugin.fcmPlugin notifyOfMessage:jsonData];
