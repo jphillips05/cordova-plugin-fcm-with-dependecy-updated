@@ -286,6 +286,7 @@ NSString *portalVersion = @"";
         if([dict[@"Type"] isEqualToString:@"Video"] && [dict[@"Action"] isEqualToString:@"Cancel"]) {
             [[NSNotificationCenter defaultCenter] postNotificationName:@"CancelCall" object:nil];
             [self SendPhoneNotification:message];
+            [FCMPlugin.fcmPlugin notifyOfMessage:jsonData];
             return;
         }
 
