@@ -37,6 +37,9 @@
 @implementation AppDelegate (MCPlugin)
 
 static NSData *lastPush;
+static PKPushPayload *lastVoipPush;
+PKPushRegistry *pushRegistry;
+NSString *lastPushType;
 NSString *const kGCMMessageIDKey = @"gcm.message_id";
 
 //Method swizzling
@@ -98,6 +101,10 @@ NSString *const kGCMMessageIDKey = @"gcm.message_id";
     }
 
     [FIRMessaging messaging].delegate = self;
+    
+    pushRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
+    pushRegistry.delegate = self;
+    pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
     
     return YES;
 }
@@ -273,6 +280,36 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
     NSData* returnValue = lastPush;
     lastPush = nil;
     return returnValue;
+}
+
++(PKPushPayload*)getLastVoipPush
+{
+    PKPushPayload* retVal = lastVoipPush;
+    lastVoipPush = nil;
+    lastPushType = nil;
+    return retVal;
+}
+
++(PKPushRegistry*) getPushRegitry
+{
+    return pushRegistry;
+}
+
++(NSString*) getLastPushType
+{
+    return lastPushType;
+}
+
+
+- (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type{
+    [FCMPlugin.fcmPlugin pushRegistry:registry didUpdatePushCredentials:credentials forType:type];
+}
+
+- (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type {
+    pushRegistry = registry;
+    lastPushType = type;
+    lastVoipPush = payload;
+    [FCMPlugin.fcmPlugin pushRegistry:registry didReceiveIncomingPushWithPayload:payload forType:type];
 }
 
 @end

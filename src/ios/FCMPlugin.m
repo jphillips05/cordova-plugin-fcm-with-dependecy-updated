@@ -143,6 +143,13 @@ NSString *portalVersion = @"";
         [FCMPlugin.fcmPlugin notifyOfMessage:lastPush];
     }
     
+    PKPushRegistry * registry = [AppDelegate getPushRegitry];
+    NSString * type = [AppDelegate getLastPushType];
+    PKPushPayload* lastVoipPush = [AppDelegate getLastVoipPush];
+    if(lastVoipPush != nil && type != nil && registry != nil) {
+        [FCMPlugin.fcmPlugin pushRegistry:registry didReceiveIncomingPushWithPayload:lastVoipPush forType:type];
+    }
+    
     CDVPluginResult* pluginResult = nil;
     pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -208,7 +215,8 @@ NSString *portalVersion = @"";
 
 
 //voip
-- (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type{
+- (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type
+{
     if([credentials.token length] == 0) {
         NSLog(@"FCM: No device token!");
         return;
@@ -228,7 +236,7 @@ NSString *portalVersion = @"";
     [FCMPlugin.fcmPlugin notifyOfVoipTokenRefresh:sToken];
 }
 
-- (void)SendPhoneNotification:(NSString *)message {
+- (void)sendMessageToNotificationCenter:(NSString *)message {
     NSLog(@"FCM: App not in the foreground sending notification");
     //if app is in background send notification to system
     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
@@ -254,6 +262,7 @@ NSString *portalVersion = @"";
 
 - (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
 {
+    NSLog(@"FCM receieved push from plugin");
 //    NSDictionary *payloadDict = payload.dictionaryPayload[@"notification"];
 //    NSLog(@"FCM: didReceiveIncomingPushWithPayload: %@", payloadDict);
 
@@ -280,19 +289,17 @@ NSString *portalVersion = @"";
         NSLog(@"FCM: Video Request, Sending json data");
         [FCMPlugin.fcmPlugin notifyOfMessage:jsonData];
     } else {
-        // If cancel request send both json and notification
-        // fix for Katie's phone
-        // for some readon the app thinks its in the foregroud after a missed call and other phones seem not to have this issue
+
         if([dict[@"Type"] isEqualToString:@"Video"] && [dict[@"Action"] isEqualToString:@"Cancel"]) {
             [[NSNotificationCenter defaultCenter] postNotificationName:@"CancelCall" object:nil];
-            [self SendPhoneNotification:message];
+            [self sendMessageToNotificationCenter:message];
             [FCMPlugin.fcmPlugin notifyOfMessage:jsonData];
             return;
         }
 
         NSLog(@"FCM: Not a Video Request");
         if(appInForeground == NO) {
-            [self SendPhoneNotification:message];
+            [self sendMessageToNotificationCenter:message];
         } else {
             NSLog(@"FCM: App in foregground, sending json");
             [FCMPlugin.fcmPlugin notifyOfMessage:jsonData];

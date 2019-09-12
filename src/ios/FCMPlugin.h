@@ -18,5 +18,4 @@
 - (void)appEnterBackground;
 - (void)appEnterForeground;
 
-
 @end
