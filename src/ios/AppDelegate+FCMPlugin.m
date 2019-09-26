@@ -41,6 +41,7 @@ static PKPushPayload *lastVoipPush;
 PKPushRegistry *pushRegistry;
 NSString *lastPushType;
 NSString *const kGCMMessageIDKey = @"gcm.message_id";
+bool appInForeground = NO;
 
 //Method swizzling
 + (void)load
@@ -51,11 +52,11 @@ NSString *const kGCMMessageIDKey = @"gcm.message_id";
 }
 
 - (BOOL)application:(UIApplication *)application customDidFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-
+    
     [self application:application customDidFinishLaunchingWithOptions:launchOptions];
-
+    
     NSLog(@"DidFinishLaunchingWithOptions");
- 
+    
     // [START configure_firebase]
     [FIRApp configure];
     // [END configure_firebase]
@@ -99,7 +100,7 @@ NSString *const kGCMMessageIDKey = @"gcm.message_id";
         [[UIApplication sharedApplication] registerForRemoteNotifications];
         // [END register_for_notifications]
     }
-
+    
     [FIRMessaging messaging].delegate = self;
     
     pushRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
@@ -155,16 +156,16 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     NSError *error;
     NSDictionary *userInfoMutable = [userInfo mutableCopy];
     
-
-        NSLog(@"New method with push callback: %@", userInfo);
-        
-        [userInfoMutable setValue:@(YES) forKey:@"wasTapped"];
-        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:userInfoMutable
-                                                           options:0
-                                                             error:&error];
-        NSLog(@"APP WAS CLOSED DURING PUSH RECEPTION Saved data: %@", jsonData);
-        lastPush = jsonData;
-
+    
+    NSLog(@"New method with push callback: %@", userInfo);
+    
+    [userInfoMutable setValue:@(YES) forKey:@"wasTapped"];
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:userInfoMutable
+                                                       options:0
+                                                         error:&error];
+    NSLog(@"APP WAS CLOSED DURING PUSH RECEPTION Saved data: %@", jsonData);
+    lastPush = jsonData;
+    
     
     completionHandler();
 }
@@ -182,7 +183,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_9_x_Max) {
         return;
     }
-
+    
     NSLog(@"Message ID: %@", userInfo[@"gcm.message_id"]);
     
     NSError *error;
@@ -209,25 +210,25 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
     if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_9_x_Max) {
         return;
     }
-
+    
     // If you are receiving a notification message while your app is in the background,
     // this callback will not be fired till the user taps on the notification launching the application.
     // TODO: Handle data of notification
-
+    
     // Print message ID.
     NSLog(@"Message ID: %@", userInfo[@"gcm.message_id"]);
-
+    
     // Pring full message.
     NSLog(@"%@", userInfo);
     NSError *error;
-
+    
     NSDictionary *userInfoMutable = [userInfo mutableCopy];
-
+    
     // Has user tapped the notificaiton?
     // UIApplicationStateActive   - app is currently active
     // UIApplicationStateInactive - app is transitioning from background to
     //                              foreground (user taps notification)
-
+    
     UIApplicationState state = application.applicationState;
     if (application.applicationState == UIApplicationStateActive
         || application.applicationState == UIApplicationStateInactive) {
@@ -237,10 +238,10 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
                                                            options:0
                                                              error:&error];
         [FCMPlugin.fcmPlugin notifyOfMessage:jsonData];
-
-    // app is in background
+        
+        // app is in background
     }
-
+    
     completionHandler(UIBackgroundFetchResultNoData);
 }
 // [END receive_message iOS < 10]
@@ -264,6 +265,7 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
     NSLog(@"app become active");
+    appInForeground = YES;
     [FCMPlugin.fcmPlugin appEnterForeground];
 }
 
@@ -271,6 +273,7 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
     NSLog(@"app entered background");
+    appInForeground = NO;
     [FCMPlugin.fcmPlugin appEnterBackground];
 }
 // // [END disconnect_from_fcm]
@@ -309,7 +312,42 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
     pushRegistry = registry;
     lastPushType = type;
     lastVoipPush = payload;
+    
+    NSDictionary *dict = payload.dictionaryPayload[@"data"];
+    if([dict[@"Type"] isEqualToString:@"Video"] && [dict[@"Action"] isEqualToString:@"Request"]) {
+        NSLog(@"FCM Not video request");
+        if (appInForeground == NO) {
+            NSLog(@"FCM app not in foreground send through notifications system");
+            NSString *message = payload.dictionaryPayload[@"notification"];
+            [self sendMessageToNotificationCenter:message];
+        }
+    }
+    
     [FCMPlugin.fcmPlugin pushRegistry:registry didReceiveIncomingPushWithPayload:payload forType:type];
+}
+
+- (void)sendMessageToNotificationCenter:(NSString *)message {
+    NSLog(@"FCM: App not in the foreground sending notification");
+    //if app is in background send notification to system
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    UNMutableNotificationContent *content = [UNMutableNotificationContent new];
+    
+    content.title = [message valueForKey:@"title"];
+    content.body = [message valueForKey: @"body"];
+    content.sound = [UNNotificationSound defaultSound];
+    UNTimeIntervalNotificationTrigger *trigger = [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:1
+                                                                                                    repeats:NO];
+    NSString *identifier = @"VhApp";
+    UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
+                                                                          content:content trigger:trigger];
+    
+    [center addNotificationRequest:request withCompletionHandler:^(NSError * _Nullable error) {
+        if (error != nil) {
+            NSLog(@"FCM: Something went wrong: %@",error);
+        } else {
+            NSLog(@"FCM: scheduled notification");
+        }
+    }];
 }
 
 @end
