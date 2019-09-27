@@ -315,6 +315,8 @@ fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
     
     NSDictionary *dict = payload.dictionaryPayload[@"data"];
     if([dict[@"Type"] isEqualToString:@"Video"] && [dict[@"Action"] isEqualToString:@"Request"]) {
+        //do nothing
+    } else {
         NSLog(@"FCM Not video request");
         if (appInForeground == NO) {
             NSLog(@"FCM app not in foreground send through notifications system");
