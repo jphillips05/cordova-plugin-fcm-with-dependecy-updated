@@ -1,30 +1,27 @@
 {
-  "_from": "git+https://github.com/VivifyHealth/cordova-plugin-fcm-with-dependecy-updated.git#v4.5.3",
-  "_id": "cordova-plugin-fcm-with-dependecy-updated@4.3.9",
+  "_from": "git+https://bitbucket.org/vivifyhealth/cordova-plugin-fcm-with-dependecy-updated.git#v4.5.3",
+  "_id": "cordova-plugin-fcm-with-dependecy-updated@4.5.4",
   "_inBundle": false,
   "_integrity": "",
   "_location": "/cordova-plugin-fcm-with-dependecy-updated",
   "_phantomChildren": {},
   "_requested": {
     "type": "git",
-    "raw": "git+https://github.com/VivifyHealth/cordova-plugin-fcm-with-dependecy-updated.git#v4.5.3",
-    "rawSpec": "git+https://github.com/VivifyHealth/cordova-plugin-fcm-with-dependecy-updated.git#v4.5.3",
-    "saveSpec": "git+https://github.com/VivifyHealth/cordova-plugin-fcm-with-dependecy-updated.git#v4.5.3",
-    "fetchSpec": "https://github.com/VivifyHealth/cordova-plugin-fcm-with-dependecy-updated.git",
+    "raw": "git+https://bitbucket.org/vivifyhealth/cordova-plugin-fcm-with-dependecy-updated.git#v4.5.3",
+    "rawSpec": "git+https://bitbucket.org/vivifyhealth/cordova-plugin-fcm-with-dependecy-updated.git#v4.5.3",
+    "saveSpec": "git+https://bitbucket.org/vivifyhealth/cordova-plugin-fcm-with-dependecy-updated.git#v4.5.3",
+    "fetchSpec": "https://bitbucket.org/vivifyhealth/cordova-plugin-fcm-with-dependecy-updated.git",
     "gitCommittish": "v4.5.3"
   },
   "_requiredBy": [
     "#USER",
     "/"
   ],
-  "_resolved": "git+https://github.com/VivifyHealth/cordova-plugin-fcm-with-dependecy-updated.git#25d710a082e16675a6721b486e5832076c73c2cb",
-  "_spec": "git+https://github.com/VivifyHealth/cordova-plugin-fcm-with-dependecy-updated.git#v4.5.3",
+  "_resolved": "git+https://bitbucket.org/vivifyhealth/cordova-plugin-fcm-with-dependecy-updated.git#25d710a082e16675a6721b486e5832076c73c2cb",
+  "_spec": "git+https://bitbucket.org/vivifyhealth/cordova-plugin-fcm-with-dependecy-updated.git#v4.5.3",
   "_where": "C:\\Workspace\\VivifyHealth\\com_vivifyhealth_byod_ionic",
   "author": {
     "name": "André Augusto Tissot"
-  },
-  "bugs": {
-    "url": "https://github.com/andrehtissot/cordova-plugin-fcm-with-dependecy-updated/issues"
   },
   "bundleDependencies": false,
   "cordova_name": "Cordova FCM Push Plugin",
@@ -32,7 +29,7 @@
   "description": "Google Firebase Cloud Messaging Cordova Push Plugin fork with dependecy updated",
   "engines": [],
   "englishdoc": "",
-  "homepage": "https://github.com/andrehtissot/cordova-plugin-fcm-with-dependecy-updated#readme",
+  "homepage": "https://bitbucket.org/vivifyhealth/cordova-plugin-fcm-with-dependecy-updated#readme",
   "issue": "",
   "keywords": [
     "ecosystem:cordova",
@@ -55,7 +52,7 @@
   "repo": "",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/andrehtissot/cordova-plugin-fcm-with-dependecy-updated.git"
+    "url": "git+https://bitbucket.org/vivifyhealth/cordova-plugin-fcm-with-dependecy-updated.git"
   },
-  "version": "4.3.9"
+  "version": "4.5.4"
 }
