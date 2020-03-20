@@ -10,7 +10,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.KeyguardManager;
 import android.os.Bundle;
+import android.os.Build;
+import android.app.Activity;
 
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -39,6 +42,21 @@ public class FCMPlugin extends CordovaPlugin {
 		Log.d(TAG, "==> FCMPlugin initialize");
 		FirebaseMessaging.getInstance().subscribeToTopic("android");
 		FirebaseMessaging.getInstance().subscribeToTopic("all");
+		// On Android O request unlock the screen
+		// TODO: this does not belong here split into its own plugin
+		// TODO: make this work on older phones as well
+		Activity mainActivity = cordova.getActivity();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+			  // display on top of lock screen
+			  mainActivity.setShowWhenLocked(true);
+			  mainActivity.setTurnScreenOn(true);
+			}else {
+			  // open the un-lock screen
+			  KeyguardManager keyguardManager = (KeyguardManager) mainActivity.getSystemService(mainActivity.getApplicationContext().KEYGUARD_SERVICE);
+			  keyguardManager.requestDismissKeyguard(mainActivity, null);
+			}
+		}
 	}
 
 	public boolean execute(final String action, final JSONArray args, final CallbackContext callbackContext)

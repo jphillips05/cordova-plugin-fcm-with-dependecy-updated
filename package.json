@@ -1,16 +1,39 @@
 {
-  "version": "4.3.9",
-  "name": "cordova-plugin-fcm-with-dependecy-updated",
-  "cordova_name": "Cordova FCM Push Plugin",
-  "description": "Google Firebase Cloud Messaging Cordova Push Plugin fork with dependecy updated",
-  "license": "MIT",
-  "repo": "",
-  "issue": "",
-  "author": "André Augusto Tissot",
-  "repository": {
+  "_from": "git+https://github.com/VivifyHealth/cordova-plugin-fcm-with-dependecy-updated.git#v4.5.3",
+  "_id": "cordova-plugin-fcm-with-dependecy-updated@4.3.9",
+  "_inBundle": false,
+  "_integrity": "",
+  "_location": "/cordova-plugin-fcm-with-dependecy-updated",
+  "_phantomChildren": {},
+  "_requested": {
     "type": "git",
-    "url": "https://github.com/andrehtissot/cordova-plugin-fcm-with-dependecy-updated"
+    "raw": "git+https://github.com/VivifyHealth/cordova-plugin-fcm-with-dependecy-updated.git#v4.5.3",
+    "rawSpec": "git+https://github.com/VivifyHealth/cordova-plugin-fcm-with-dependecy-updated.git#v4.5.3",
+    "saveSpec": "git+https://github.com/VivifyHealth/cordova-plugin-fcm-with-dependecy-updated.git#v4.5.3",
+    "fetchSpec": "https://github.com/VivifyHealth/cordova-plugin-fcm-with-dependecy-updated.git",
+    "gitCommittish": "v4.5.3"
   },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "git+https://github.com/VivifyHealth/cordova-plugin-fcm-with-dependecy-updated.git#25d710a082e16675a6721b486e5832076c73c2cb",
+  "_spec": "git+https://github.com/VivifyHealth/cordova-plugin-fcm-with-dependecy-updated.git#v4.5.3",
+  "_where": "C:\\Workspace\\VivifyHealth\\com_vivifyhealth_byod_ionic",
+  "author": {
+    "name": "André Augusto Tissot"
+  },
+  "bugs": {
+    "url": "https://github.com/andrehtissot/cordova-plugin-fcm-with-dependecy-updated/issues"
+  },
+  "bundleDependencies": false,
+  "cordova_name": "Cordova FCM Push Plugin",
+  "deprecated": false,
+  "description": "Google Firebase Cloud Messaging Cordova Push Plugin fork with dependecy updated",
+  "engines": [],
+  "englishdoc": "",
+  "homepage": "https://github.com/andrehtissot/cordova-plugin-fcm-with-dependecy-updated#readme",
+  "issue": "",
   "keywords": [
     "ecosystem:cordova",
     "cordova-android",
@@ -23,10 +46,16 @@
     "android",
     "cordova"
   ],
+  "license": "MIT",
+  "name": "cordova-plugin-fcm-with-dependecy-updated",
   "platforms": [
     "android",
     "ios"
   ],
-  "engines": [],
-  "englishdoc": ""
+  "repo": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andrehtissot/cordova-plugin-fcm-with-dependecy-updated.git"
+  },
+  "version": "4.3.9"
 }
