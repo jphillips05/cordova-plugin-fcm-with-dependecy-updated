@@ -162,11 +162,7 @@ NSString *portalVersion = @"";
     NSString * notifyJS = [NSString stringWithFormat:@"%@(%@);", notificationCallback, JSONString];
     NSLog(@"stringByEvaluatingJavaScriptFromString %@", notifyJS);
     
-    if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
-        [(WKWebView *)self.webView stringByEvaluatingJavaScriptFromString:notifyJS];
-    } else {
-        [self.webViewEngine evaluateJavaScript:notifyJS completionHandler:nil];
-    }
+    [self.webViewEngine evaluateJavaScript:notifyJS completionHandler:nil];
 }
 
 -(void) notifyOfVoipTokenRefresh:(NSString *)token {
@@ -174,11 +170,7 @@ NSString *portalVersion = @"";
     NSString * notifyJS = [NSString stringWithFormat:@"%@('%@');", tokenRefreshCallback, token];
     NSLog(@"stringByEvaluatingJavaScriptFromString %@", notifyJS);
     
-    if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
-        [(WKWebView *)self.webView stringByEvaluatingJavaScriptFromString:notifyJS];
-    } else {
-        [self.webViewEngine evaluateJavaScript:notifyJS completionHandler:nil];
-    }
+    [self.webViewEngine evaluateJavaScript:notifyJS completionHandler:nil];
 }
 
 -(void) notifyOfTokenRefresh:(NSString *)token
@@ -187,12 +179,8 @@ NSString *portalVersion = @"";
         fcmToken = token;
         NSString * notifyJS = [NSString stringWithFormat:@"%@('%@');", tokenRefreshCallback, token];
         NSLog(@"stringByEvaluatingJavaScriptFromString %@", notifyJS);
-        
-        if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
-            [(WKWebView *)self.webView stringByEvaluatingJavaScriptFromString:notifyJS];
-        } else {
-            [self.webViewEngine evaluateJavaScript:notifyJS completionHandler:nil];
-        }
+
+        [self.webViewEngine evaluateJavaScript:notifyJS completionHandler:nil];
     }
 }
 
