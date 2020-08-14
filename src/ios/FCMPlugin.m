@@ -4,6 +4,7 @@
 #import "AppDelegate+FCMPlugin.h"
 
 #import <Cordova/CDV.h>
+#import <WebKit/WebKit.h>
 #import "FCMPlugin.h"
 #import "Firebase.h"
 #import <PushKit/PushKit.h>
@@ -162,7 +163,7 @@ NSString *portalVersion = @"";
     NSLog(@"stringByEvaluatingJavaScriptFromString %@", notifyJS);
     
     if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
-        [(UIWebView *)self.webView stringByEvaluatingJavaScriptFromString:notifyJS];
+        [(WKWebView *)self.webView stringByEvaluatingJavaScriptFromString:notifyJS];
     } else {
         [self.webViewEngine evaluateJavaScript:notifyJS completionHandler:nil];
     }
@@ -174,7 +175,7 @@ NSString *portalVersion = @"";
     NSLog(@"stringByEvaluatingJavaScriptFromString %@", notifyJS);
     
     if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
-        [(UIWebView *)self.webView stringByEvaluatingJavaScriptFromString:notifyJS];
+        [(WKWebView *)self.webView stringByEvaluatingJavaScriptFromString:notifyJS];
     } else {
         [self.webViewEngine evaluateJavaScript:notifyJS completionHandler:nil];
     }
@@ -188,7 +189,7 @@ NSString *portalVersion = @"";
         NSLog(@"stringByEvaluatingJavaScriptFromString %@", notifyJS);
         
         if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
-            [(UIWebView *)self.webView stringByEvaluatingJavaScriptFromString:notifyJS];
+            [(WKWebView *)self.webView stringByEvaluatingJavaScriptFromString:notifyJS];
         } else {
             [self.webViewEngine evaluateJavaScript:notifyJS completionHandler:nil];
         }
